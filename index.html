@@ -1583,7 +1583,7 @@ body.theme-5ka .btn-primary:hover {
     <div class="modal-card">
       <div class="modal-icon">🎉</div>
       <h3 class="modal-title" id="requestSummaryTitle">Поздравляем! Анкета заполнена!</h3>
-      <p class="modal-desc">Запрос отправлен. Автоматически подтвердить получение не удалось. Окно закроется через 50 секунд.</p>
+      <p class="modal-desc">Спасибо за отклик! Проверьте данные вашей анкеты ниже.</p>
       <div class="lead-summary">
         <p><strong>Компания:</strong> ВкусВилл</p>
         <p><strong>Соискатель:</strong> <span id="summaryName"></span></p>
@@ -2019,7 +2019,7 @@ async function handleFormSubmit(e) {
   try {
     // Ответ Google Apps Script в no-cors недоступен браузеру: нельзя подтвердить доставку.
     await fetch(APPLICATION_URL, {method:'POST', mode:'no-cors', body:data});
-    status.textContent = 'Запрос отправлен. Автоматически подтвердить получение не удалось.';
+    status.textContent = 'Спасибо за отклик!';
     document.getElementById('summaryName').textContent = name.value.trim();
     document.getElementById('summaryPhone').textContent = phone.value.trim();
     document.getElementById('summaryCity').textContent = document.getElementById('applicantCity').value.trim() || 'Не указан';
