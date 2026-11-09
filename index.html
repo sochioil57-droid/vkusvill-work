@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Работа и подработка — Доставка и Сборка заказов</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="theme-vkusvill" id="pageBody">
+
+  <!-- ПАНЕЛЬ ПЕРЕКЛЮЧЕНИЯ ЛЕНДИНГОВ (ДВА БРЕНДА) -->
+  <aside class="brand-bar" aria-label="Выбор компании">
+    <div class="brand-bar-inner">
+      <span class="brand-bar-label">Выберите лендинг:</span>
+      <div class="brand-toggle-group">
+        <button type="button" class="brand-btn active" id="btnVkusvill" onclick="setBrand('vkusvill')">
+          <span class="dot dot-vv"></span>
+          <strong>ВкусВилл</strong>
+        </button>
+        <button type="button" class="brand-btn" id="btn5ka" onclick="setBrand('5ka')">
+          <span class="dot dot-5ka"></span>
+          <strong>Пятёрочка</strong>
+        </button>
+      </div>
+      <div class="brand-bar-actions">
+        <button type="button" class="export-btn" onclick="openLeadsModal()" title="Посмотреть сохраненные заявки">
+          📋 Заявки (<span id="leadsCount">0</span>)
+        </button>
+        <a href="vkusvill.html" class="single-link" target="_blank" title="Открыть чистый лендинг ВкусВилл">🔗 ВкусВилл.html</a>
+        <a href="5ka.html" class="single-link" target="_blank" title="Открыть чистый лендинг Пятёрочка">🔗 5ka.html</a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ШАПКА САЙТА -->
+  <header class="header">
+    <div class="container header-container">
+      <div class="logo-box">
+        <div class="logo-icon" id="brandLogo">
+          <!-- Логотип подставляется скриптом (SVG) -->
+        </div>
+        <div class="logo-text">
+          <span class="brand-title" id="brandName">ВкусВилл</span>
+          <span class="brand-badge" id="brandBadge">Официальный набор партнеров</span>
+        </div>
+      </div>
+      <div class="header-phone">
+        <span class="status-indicator"></span>
+        <span id="calloutText">Набор открыт в вашем городе</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ГЛАВНЫЙ БАННЕР -->
+  <section class="hero">
+    <div class="container hero-container">
+      <div class="hero-badge" id="heroBadge">🟢 Свежие вакансии с ежедневным доходом</div>
+      <h1 class="hero-title" id="heroTitle">Работа во ВкусВилл: быстрый доход рядом с домом</h1>
+      <p class="hero-subtitle" id="heroSubtitle">Выплаты без задержек, честные условия, свободный график и выбор удобного района</p>
+      
+      <div class="hero-highlights" id="heroHighlights">
+        <div class="highlight-item">
+          <span class="hl-icon">⚡</span>
+          <span class="hl-text" id="hl1">Выплаты каждый день</span>
+        </div>
+        <div class="highlight-item">
+          <span class="hl-icon">📍</span>
+          <span class="hl-text" id="hl2">Рядом с вашим домом</span>
+        </div>
+        <div class="highlight-item">
+          <span class="hl-icon">🕒</span>
+          <span class="hl-text" id="hl3">Смены от 4 до 12 часов</span>
+        </div>
+        <div class="highlight-item">
+          <span class="hl-icon">🛡️</span>
+          <span class="hl-text" id="hl4">Без опыта — обучаем за 1 день</span>
+        </div>
+      </div>
+
+      <div class="hero-cta-row">
+        <a href="#vacancies" class="btn btn-primary" id="heroCtaBtn">Выбрать вакансию</a>
+        <a href="#calc" class="btn btn-secondary">Рассчитать доход</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- КАРТОЧКИ ВАКАНСИЙ (3 ПРОФЕССИИ) -->
+  <section class="section" id="vacancies">
+    <div class="container">
+      <div class="section-head">
+        <h2 class="section-title">Выберите подходящую профессию</h2>
+        <p class="section-desc">Нажмите «Выбрать», чтобы рассчитать заработок и подать заявку</p>
+      </div>
+
+      <div class="cards-grid" id="vacancyCards">
+        <!-- Карточки генерируются динамически под выбранный бренд -->
+      </div>
+    </div>
+  </section>
+
+  <!-- КАЛЬКУЛЯТОР ЗАРАБОТКА С ПОЛЗУНКАМИ ДО 12 ЧАСОВ -->
+  <section class="section calc-section" id="calc">
+    <div class="container">
+      <div class="calc-wrapper">
+        <div class="calc-head">
+          <span class="calc-tag">🧮 Интерактивный калькулятор</span>
+          <h2 class="calc-title">Сколько вы будете зарабатывать?</h2>
+          <p class="calc-desc">Двигайте ползунки, чтобы настроить количество часов и рабочих дней</p>
+        </div>
+
+        <div class="calc-body">
+          <div class="calc-controls">
+            <!-- Выбор роли для калькулятора -->
+            <div class="control-group">
+              <label class="control-label">Профессия:</label>
+              <div class="role-selector" id="roleSelector">
+                <!-- Кнопки ролей генерируются скриптом -->
+              </div>
+            </div>
+
+            <!-- Ползунок часов (до 12 часов) -->
+            <div class="control-group">
+              <div class="control-header">
+                <label for="hoursSlider" class="control-label">Часов в смену:</label>
+                <span class="slider-val" id="hoursVal">8 часов</span>
+              </div>
+              <input type="range" id="hoursSlider" min="4" max="12" step="1" value="8" class="range-slider">
+              <div class="range-labels">
+                <span>4 ч (подработка)</span>
+                <span>8 ч (стандарт)</span>
+                <span>12 ч (макс)</span>
+              </div>
+            </div>
+
+            <!-- Ползунок дней в неделю -->
+            <div class="control-group">
+              <div class="control-header">
+                <label for="daysSlider" class="control-label">Дней в неделю:</label>
+                <span class="slider-val" id="daysVal">5 дней</span>
+              </div>
+              <input type="range" id="daysSlider" min="1" max="7" step="1" value="5" class="range-slider">
+              <div class="range-labels">
+                <span>1 день</span>
+                <span>3 дня</span>
+                <span>5 дней</span>
+                <span>7 дней</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Результат расчета дохода -->
+          <div class="calc-result-box">
+            <div class="result-badge">Прогноз дохода</div>
+            <div class="result-row">
+              <span class="result-sublabel">За одну смену:</span>
+              <div class="result-price" id="calcShiftTotal">0 ₽</div>
+            </div>
+            <div class="result-row primary-result">
+              <span class="result-sublabel">В месяц (~4 недели):</span>
+              <div class="result-price-month" id="calcMonthTotal">0 ₽</div>
+            </div>
+            <div class="result-details">
+              <div class="res-item">
+                <span class="res-muted">Ставка:</span>
+                <strong id="calcRateInfo">0 ₽ / час</strong>
+              </div>
+              <div class="res-item">
+                <span class="res-muted">Часов в месяц:</span>
+                <strong id="calcHoursMonth">160 ч</strong>
+              </div>
+            </div>
+            <a href="#apply-form" class="btn btn-primary btn-block" onclick="applyCalcToForm()">
+              Зафиксировать ставку и откликнуться
+            </a>
+            <p class="calc-note">* Выплаты без задержек. Точный доход зависит от количества выполненных заказов и бонусов.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- БЫСТРАЯ АНКЕТА (ОБРАТНАЯ СВЯЗЬ) -->
+  <section class="section form-section" id="apply-form">
+    <div class="container">
+      <div class="form-card">
+        <div class="form-header">
+          <div class="form-icon">📝</div>
+          <h2 class="form-title" id="formHeaderTitle">Быстрая анкета соискателя</h2>
+          <p class="form-subtitle">Заполните поля ниже — наш менеджер перезвонит вам в течение 15 минут для подтверждения</p>
+        </div>
+
+        <form id="jobForm" novalidate>
+          <div class="form-row">
+            <div class="form-field">
+              <label for="applicantName">Ваше имя <span class="req">*</span></label>
+              <input type="text" id="applicantName" name="name" placeholder="Например: Иван" required autocomplete="name">
+              <span class="field-error" id="nameError"></span>
+            </div>
+
+            <div class="form-field">
+              <label for="applicantPhone">Номер телефона <span class="req">*</span></label>
+              <input type="tel" id="applicantPhone" name="phone" placeholder="+7 (___) ___-__-__" required autocomplete="tel">
+              <span class="field-error" id="phoneError"></span>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-field">
+              <label for="applicantVacancy">Вакансия <span class="req">*</span></label>
+              <select id="applicantVacancy" name="vacancy" required>
+                <!-- Опции заполняются динамически -->
+              </select>
+            </div>
+
+            <div class="form-field">
+              <label for="applicantExp">Стаж / Опыт работы</label>
+              <select id="applicantExp" name="experience">
+                <option value="Без опыта">Без опыта (научим с нуля)</option>
+                <option value="До 1 года">До 1 года</option>
+                <option value="1–3 года">От 1 до 3 лет</option>
+                <option value="Более 3 лет">Более 3 лет</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label for="applicantLastJob">Где работали последним местом (или напишите «нет опыта»)</label>
+            <input type="text" id="applicantLastJob" name="lastJob" placeholder="Компания, сфера или должность (необязательно)">
+          </div>
+
+          <div class="form-field">
+            <label for="applicantCity">Город / Район проживания</label>
+            <input type="text" id="applicantCity" name="city" placeholder="Например: Москва, м. Сокол">
+          </div>
+
+          <div class="form-agreement">
+            <label class="checkbox-container">
+              <input type="checkbox" id="agreeData" checked required>
+              <span class="checkmark"></span>
+              <span class="agreement-text">
+                Я согласен на обработку персональных данных и обратный звонок по вакансии. Данные передаются конфиденциально.
+              </span>
+            </label>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-submit" id="submitBtn">
+            <span class="btn-text" id="submitBtnText">Получить работу</span>
+            <span class="btn-spinner" style="display:none;">⏳</span>
+          </button>
+        </form>
+
+        <div class="form-footer-guarantee">
+          <span>🔒 Конфиденциально</span>
+          <span>⚡ Обратный звонок за 15 минут</span>
+          <span>🆓 Бесплатное трудоустройство</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ПРЕИМУЩЕСТВА КОМПАНИИ -->
+  <section class="section perks-section">
+    <div class="container">
+      <div class="section-head">
+        <h2 class="section-title" id="perksTitle">Почему работать у нас выгодно</h2>
+        <p class="section-desc">Удобные условия для каждого партнера и сотрудника</p>
+      </div>
+
+      <div class="perks-grid" id="perksGrid">
+        <!-- Генерируется под бренд -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ФУТЕР -->
+  <footer class="footer">
+    <div class="container footer-container">
+      <div class="footer-brand">
+        <span class="footer-logo-text" id="footerBrand">ВкусВилл Работа</span>
+        <p class="footer-copy">Сервис содействия быстрому трудоустройству в сфере доставки и ритейла. Не является публичной офертой.</p>
+      </div>
+      <div class="footer-links">
+        <button type="button" class="text-link" onclick="openGScriptHelp()">Инструкция Google Таблиц</button>
+        <button type="button" class="text-link" onclick="openLeadsModal()">База откликов (<span id="footerLeadsCount">0</span>)</button>
+      </div>
+    </div>
+  </footer>
+
+  <!-- МОДАЛЬНОЕ ОКНО УСПЕХА -->
+  <div class="modal-backdrop" id="successModal">
+    <div class="modal-card">
+      <div class="modal-icon">🎉</div>
+      <h3 class="modal-title">Заявка успешно принята!</h3>
+      <p class="modal-desc" id="successMsg">Спасибо! Мы сохранили вашу анкету и перезвоним вам в течение 15 минут, чтобы согласовать дату первого выхода на работу.</p>
+      <div class="lead-summary" id="modalLeadSummary"></div>
+      <button type="button" class="btn btn-primary btn-block" onclick="closeModal('successModal')">Отлично, жду звонка</button>
+    </div>
+  </div>
+
+  <!-- МОДАЛЬНОЕ ОКНО ПРОСМОТРА ЛИДОВ (ДЛЯ АВТОРА/РЕКРУТЕРА) -->
+  <div class="modal-backdrop" id="leadsModal">
+    <div class="modal-card modal-wide">
+      <div class="modal-header-row">
+        <h3 class="modal-title">📋 Собранные анкеты (Лиды)</h3>
+        <button type="button" class="close-x" onclick="closeModal('leadsModal')">&times;</button>
+      </div>
+      <p class="modal-desc">Здесь сохраняются все отправленные через форму контакты соискателей. Они сохраняются в браузере и могут отправляться в Google Таблицу.</p>
+      
+      <div class="leads-toolbar">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="exportLeadsCSV()">📥 Скачать в Excel (CSV)</button>
+        <button type="button" class="btn btn-danger btn-sm" onclick="clearLeads()">🗑️ Очистить список</button>
+      </div>
+
+      <div class="table-responsive">
+        <table class="leads-table">
+          <thead>
+            <tr>
+              <th>Дата</th>
+              <th>Компания</th>
+              <th>Имя</th>
+              <th>Телефон</th>
+              <th>Вакансия</th>
+              <th>Опыт</th>
+              <th>Город</th>
+            </tr>
+          </thead>
+          <tbody id="leadsTableBody">
+            <tr><td colspan="7" class="empty-table">Заявок пока нет. Отправьте тестовую анкету через форму!</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <button type="button" class="btn btn-secondary btn-block mt-4" onclick="closeModal('leadsModal')">Закрыть</button>
+    </div>
+  </div>
+
+  <!-- МОДАЛЬНОЕ ОКНО GOOGLE ТАБЛИЦ -->
+  <div class="modal-backdrop" id="gscriptModal">
+    <div class="modal-card modal-wide">
+      <div class="modal-header-row">
+        <h3 class="modal-title">📊 Подключение к Google Таблицам</h3>
+        <button type="button" class="close-x" onclick="closeModal('gscriptModal')">&times;</button>
+      </div>
+      <div class="instructions-content">
+        <p>Чтобы все поступающие анкеты автоматически записывались в вашу личную Google Таблицу:</p>
+        <ol>
+          <li>Создайте новую <strong>Google Таблицу</strong> (Google Sheets).</li>
+          <li>В верхнем меню нажмите <strong>Расширения → Apps Script</strong>.</li>
+          <li>Вставьте следующий код:</li>
+        </ol>
+        <pre class="code-box"><code>function doPost(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var p = e.parameter;
+  sheet.appendRow([
+    new Date(),
+    p.brand || 'ВкусВилл',
+    p.name || '',
+    p.phone || '',
+    p.vacancy || '',
+    p.experience || '',
+    p.lastJob || '',
+    p.city || '',
+    p.hours || '',
+    p.days || '',
+    p.estMonth || ''
+  ]);
+  return ContentService.createTextOutput("OK").setMimeType(ContentService.MimeType.TEXT);
+}</code></pre>
+        <ol start="4">
+          <li>Нажмите <strong>Развернуть → Новое развертывание</strong> → выберите тип <strong>Веб-приложение</strong>.</li>
+          <li>В поле «У кого есть доступ» укажите <strong>Все (Anyone)</strong>.</li>
+          <li>Скопируйте URL веб-приложения и вставьте его ниже:</li>
+        </ol>
+
+        <div class="gscript-input-group">
+          <label for="scriptUrlInput"><strong>URL вашего Google Apps Script:</strong></label>
+          <input type="text" id="scriptUrlInput" placeholder="https://script.google.com/macros/s/.../exec">
+          <button type="button" class="btn btn-primary" onclick="saveScriptUrl()">Сохранить URL</button>
+        </div>
+      </div>
+      <button type="button" class="btn btn-secondary btn-block mt-4" onclick="closeModal('gscriptModal')">Понятно, закрыть</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a57babb92bce65f7',t:'MTc5NDIxNTI4NA=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a57babb92bce65f7',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
