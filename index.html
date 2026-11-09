@@ -1582,8 +1582,8 @@ body.theme-5ka .btn-primary:hover {
   <div class="modal-backdrop" id="requestSummary" role="dialog" aria-modal="true" aria-labelledby="requestSummaryTitle">
     <div class="modal-card">
       <div class="modal-icon">🎉</div>
-      <h3 class="modal-title" id="requestSummaryTitle">Поздравляем! Анкета заполнена!</h3>
-      <p class="modal-desc">Спасибо за отклик! Проверьте данные вашей анкеты ниже.</p>
+      <h3 class="modal-title" id="requestSummaryTitle">Заявка успешно принята!</h3>
+      <p class="modal-desc">Спасибо за отклик! Ваша заявка сохранена. Проверьте данные вашей анкеты ниже.</p>
       <div class="lead-summary">
         <p><strong>Компания:</strong> ВкусВилл</p>
         <p><strong>Соискатель:</strong> <span id="summaryName"></span></p>
@@ -2003,7 +2003,9 @@ async function handleFormSubmit(e) {
     agree.focus();
     return;
   }
+  const requestId = Array.from(crypto.getRandomValues(new Uint8Array(16)), b => b.toString(16).padStart(2, '0')).join('');
   const data = new URLSearchParams({
+    requestId: requestId,
     brand: 'ВкусВилл', name: name.value.trim(), phone: phone.value.trim(),
     vacancy: document.getElementById('applicantVacancy').value,
     experience: document.getElementById('applicantExp').value,
@@ -2016,24 +2018,69 @@ async function handleFormSubmit(e) {
   const btn = document.getElementById('submitBtn');
   btn.disabled = true;
   status.textContent = 'Отправка…';
+  const snapshot = { name: name.value.trim(), phone: phone.value.trim(),
+    city: document.getElementById('applicantCity').value.trim() || 'Не указан',
+    vacancy: document.getElementById('applicantVacancy').value,
+    income: document.getElementById('calcMonthTotal').textContent };
   try {
-    // Ответ Google Apps Script в no-cors недоступен браузеру: нельзя подтвердить доставку.
-    await fetch(APPLICATION_URL, {method:'POST', mode:'no-cors', body:data});
-    status.textContent = 'Спасибо за отклик!';
-    document.getElementById('summaryName').textContent = name.value.trim();
-    document.getElementById('summaryPhone').textContent = phone.value.trim();
-    document.getElementById('summaryCity').textContent = document.getElementById('applicantCity').value.trim() || 'Не указан';
-    document.getElementById('summaryVacancy').textContent = document.getElementById('applicantVacancy').value;
-    document.getElementById('summaryIncome').textContent = document.getElementById('calcMonthTotal').textContent;
-    document.getElementById('requestSummary').classList.add('open');
-    document.getElementById('closeRequestSummary').focus();
-    clearTimeout(summaryCloseTimer);
-    summaryCloseTimer = setTimeout(closeRequestSummary, 50000);
+    // Запрос уходит один раз. Проверка статуса не отправляет заявку повторно.
+    fetch(APPLICATION_URL, {method:'POST', mode:'no-cors', body:data}).catch(() => {});
+    const result = await waitForReceipt(requestId);
+    if (result === 'ok' || result === 'saved_no_email' || result === 'saved') {
+      status.textContent = 'Заявка принята.';
+      document.getElementById('summaryName').textContent = snapshot.name;
+      document.getElementById('summaryPhone').textContent = snapshot.phone;
+      document.getElementById('summaryCity').textContent = snapshot.city;
+      document.getElementById('summaryVacancy').textContent = snapshot.vacancy;
+      document.getElementById('summaryIncome').textContent = snapshot.income;
+      document.getElementById('requestSummary').classList.add('open');
+      document.getElementById('closeRequestSummary').focus();
+      clearTimeout(summaryCloseTimer);
+      summaryCloseTimer = setTimeout(closeRequestSummary, 50000);
+    } else if (result === 'error') {
+      status.textContent = 'Не удалось принять заявку. Пожалуйста, проверьте данные и попробуйте позже.';
+    } else {
+      status.textContent = 'Не удалось проверить получение заявки. Не отправляйте её повторно сразу — возможно, она уже поступила.';
+    }
   } catch (error) {
-    status.textContent = 'Не удалось отправить запрос. Проверьте интернет и попробуйте снова.';
+    status.textContent = 'Не удалось проверить получение заявки. Возможно, она уже поступила.';
   } finally {
     btn.disabled = false;
   }
+}
+
+// Ответ содержит только статус и случайный идентификатор, без персональных данных.
+function waitForReceipt(id) {
+  return new Promise(resolve => {
+    const callback = 'receipt_' + id;
+    const deadline = Date.now() + 40000;
+    let lastStatus = 'pending';
+    function poll() {
+      if (Date.now() >= deadline) { resolve(lastStatus === 'saved' ? 'saved' : 'unknown'); return; }
+      const script = document.createElement('script');
+      let settled = false;
+      const watchdog = setTimeout(() => finish(null), 5000);
+      function finish(value) {
+        if (settled) return;
+        settled = true;
+        clearTimeout(watchdog);
+        script.remove();
+        delete window[callback];
+        if (value && ['ok', 'saved_no_email', 'error'].includes(value.status)) {
+          resolve(value.status);
+        } else {
+          if (value && value.status === 'saved') lastStatus = 'saved';
+          setTimeout(poll, 1500);
+        }
+      }
+      window[callback] = value => finish(value);
+      script.onerror = () => finish(null);
+      const q = new URLSearchParams({action:'receipt', id, callback, t:String(Date.now())});
+      script.src = APPLICATION_URL + '?' + q.toString();
+      document.head.appendChild(script);
+    }
+    poll();
+  });
 }
 
 function closeRequestSummary() {
