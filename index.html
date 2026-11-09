@@ -1479,11 +1479,11 @@ body.theme-5ka .btn-primary:hover {
         <div class="form-header">
           <div class="form-icon">📝</div>
           <h2 class="form-title" id="formHeaderTitle">Быстрая анкета соискателя</h2>
-          <p class="form-subtitle">Черновик: форма пока не подключена. Пожалуйста, не вводите личные данные.</p>
+          <p class="form-subtitle">Заполните анкету, чтобы откликнуться на вакансию.</p>
         </div>
 
         <form id="jobForm" novalidate>
-          <fieldset disabled style="border:0;padding:0;margin:0">
+          
           <div class="form-row">
             <div class="form-field">
               <label for="applicantName">Ваше имя <span class="req">*</span></label>
@@ -1529,7 +1529,7 @@ body.theme-5ka .btn-primary:hover {
 
           <div class="form-agreement">
             <label class="checkbox-container">
-              <input type="checkbox" id="agreeData" checked required>
+              <input type="checkbox" id="agreeData" required>
               <span class="checkmark"></span>
               <span class="agreement-text">
                 Я согласен на обработку персональных данных и обратный звонок по вакансии. Данные передаются конфиденциально.
@@ -1537,16 +1537,16 @@ body.theme-5ka .btn-primary:hover {
             </label>
           </div>
 
+          <div id="submitStatus" role="status" aria-live="polite" style="margin: 12px 0; line-height: 1.5;"></div>
           <button type="submit" class="btn btn-primary btn-submit" id="submitBtn">
             <span class="btn-text" id="submitBtnText">Получить работу</span>
             <span class="btn-spinner" style="display:none;">⏳</span>
           </button>
-          </fieldset>
         </form>
 
         <div class="form-footer-guarantee">
           <span>🔒 Конфиденциально</span>
-          <span>⚠️ Приём заявок пока не подключён</span>
+          <span>📋 Отклик на выбранную вакансию</span>
           <span>🆓 Бесплатное трудоустройство</span>
         </div>
       </div>
@@ -1762,7 +1762,7 @@ function applyBrand(brandKey) {
   // Кнопка в Hero
   document.getElementById('heroCtaBtn').textContent = 'Выбрать вакансию в ' + brand.name;
   document.getElementById('formHeaderTitle').textContent = 'Анкета для работы в ' + brand.name;
-  document.getElementById('submitBtnText').textContent = 'Приём заявок пока не подключён';
+  document.getElementById('submitBtnText').textContent = 'Отправить заявку';
   document.getElementById('perksTitle').textContent = 'Почему работать в ' + brand.name + ' выгодно';
 
   // Рендер карточек вакансий
@@ -1956,10 +1956,56 @@ function initPhoneMask(input) {
   });
 }
 
-// Форма отключена до подключения проверенного сервиса приёма заявок.
-function handleFormSubmit(e) {
+// Обработчик, который владелец проверил тестовой заявкой.
+const APPLICATION_URL = 'https://script.google.com/macros/s/AKfycbymV68r2ABjxH7j1U0eIWbNMloqQ9FVEn8rrp-fR5V0kOjx3SaMkw4uogk78QOujUQd3w/exec';
+async function handleFormSubmit(e) {
   e.preventDefault();
-  alert('Приём заявок пока не подключён.');
+  const name = document.getElementById('applicantName');
+  const phone = document.getElementById('applicantPhone');
+  const agree = document.getElementById('agreeData');
+  const nameError = document.getElementById('nameError');
+  const phoneError = document.getElementById('phoneError');
+  const status = document.getElementById('submitStatus');
+  nameError.textContent = '';
+  phoneError.textContent = '';
+  status.textContent = '';
+  if (name.value.trim().length < 2) {
+    nameError.textContent = 'Укажите ваше имя';
+    name.focus();
+    return;
+  }
+  if (phone.value.replace(/\D/g, '').length !== 11) {
+    phoneError.textContent = 'Введите номер телефона полностью';
+    phone.focus();
+    return;
+  }
+  if (!agree.checked) {
+    status.textContent = 'Для отправки необходимо согласие на обработку данных.';
+    agree.focus();
+    return;
+  }
+  const data = new URLSearchParams({
+    brand: 'ВкусВилл', name: name.value.trim(), phone: phone.value.trim(),
+    vacancy: document.getElementById('applicantVacancy').value,
+    experience: document.getElementById('applicantExp').value,
+    lastJob: document.getElementById('applicantLastJob').value.trim(),
+    city: document.getElementById('applicantCity').value.trim(),
+    hours: currentHours + ' ч', days: currentDays + ' дн',
+    estMonth: document.getElementById('calcMonthTotal').textContent,
+    consent: 'yes'
+  });
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  status.textContent = 'Отправка…';
+  try {
+    // Ответ Google Apps Script в no-cors недоступен браузеру: нельзя подтвердить доставку.
+    await fetch(APPLICATION_URL, {method:'POST', mode:'no-cors', body:data});
+    status.textContent = 'Запрос отправлен. Автоматически подтвердить получение не удалось. Если с вами не связались, уточните статус заявки.';
+  } catch (error) {
+    status.textContent = 'Не удалось отправить запрос. Проверьте интернет и попробуйте снова.';
+  } finally {
+    btn.disabled = false;
+  }
 }
 
 </script>
