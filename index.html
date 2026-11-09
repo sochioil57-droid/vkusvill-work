@@ -1529,7 +1529,7 @@ body.theme-5ka .btn-primary:hover {
 
           <div class="form-agreement">
             <label class="checkbox-container">
-              <input type="checkbox" id="agreeData" required>
+              <input type="checkbox" id="agreeData" checked required>
               <span class="checkmark"></span>
               <span class="agreement-text">
                 Я согласен на обработку персональных данных и обратный звонок по вакансии. Данные передаются конфиденциально.
@@ -1577,6 +1577,24 @@ body.theme-5ka .btn-primary:hover {
 
     </div>
   </footer>
+
+  <!-- Сводка отправленного запроса -->
+  <div class="modal-backdrop" id="requestSummary" role="dialog" aria-modal="true" aria-labelledby="requestSummaryTitle">
+    <div class="modal-card">
+      <div class="modal-icon">🎉</div>
+      <h3 class="modal-title" id="requestSummaryTitle">Поздравляем! Анкета заполнена!</h3>
+      <p class="modal-desc">Запрос отправлен. Автоматически подтвердить получение не удалось. Окно закроется через 50 секунд.</p>
+      <div class="lead-summary">
+        <p><strong>Компания:</strong> ВкусВилл</p>
+        <p><strong>Соискатель:</strong> <span id="summaryName"></span></p>
+        <p><strong>Телефон:</strong> <span id="summaryPhone"></span></p>
+        <p><strong>Город:</strong> <span id="summaryCity"></span></p>
+        <p><strong>Вакансия:</strong> <span id="summaryVacancy"></span></p>
+        <p><strong>Прогноз заработка:</strong> <span id="summaryIncome"></span> в месяц</p>
+      </div>
+      <button type="button" class="btn btn-primary btn-block" id="closeRequestSummary" onclick="closeRequestSummary()">Отлично, жду звонка</button>
+    </div>
+  </div>
 
   <script>
 /* ===================================================================
@@ -1958,6 +1976,7 @@ function initPhoneMask(input) {
 
 // Обработчик, который владелец проверил тестовой заявкой.
 const APPLICATION_URL = 'https://script.google.com/macros/s/AKfycbymV68r2ABjxH7j1U0eIWbNMloqQ9FVEn8rrp-fR5V0kOjx3SaMkw4uogk78QOujUQd3w/exec';
+let summaryCloseTimer;
 async function handleFormSubmit(e) {
   e.preventDefault();
   const name = document.getElementById('applicantName');
@@ -2000,13 +2019,31 @@ async function handleFormSubmit(e) {
   try {
     // Ответ Google Apps Script в no-cors недоступен браузеру: нельзя подтвердить доставку.
     await fetch(APPLICATION_URL, {method:'POST', mode:'no-cors', body:data});
-    status.textContent = 'Запрос отправлен. Автоматически подтвердить получение не удалось. Если с вами не связались, уточните статус заявки.';
+    status.textContent = 'Запрос отправлен. Автоматически подтвердить получение не удалось.';
+    document.getElementById('summaryName').textContent = name.value.trim();
+    document.getElementById('summaryPhone').textContent = phone.value.trim();
+    document.getElementById('summaryCity').textContent = document.getElementById('applicantCity').value.trim() || 'Не указан';
+    document.getElementById('summaryVacancy').textContent = document.getElementById('applicantVacancy').value;
+    document.getElementById('summaryIncome').textContent = document.getElementById('calcMonthTotal').textContent;
+    document.getElementById('requestSummary').classList.add('open');
+    document.getElementById('closeRequestSummary').focus();
+    clearTimeout(summaryCloseTimer);
+    summaryCloseTimer = setTimeout(closeRequestSummary, 50000);
   } catch (error) {
     status.textContent = 'Не удалось отправить запрос. Проверьте интернет и попробуйте снова.';
   } finally {
     btn.disabled = false;
   }
 }
+
+function closeRequestSummary() {
+  clearTimeout(summaryCloseTimer);
+  document.getElementById('requestSummary').classList.remove('open');
+  document.getElementById('submitBtn').focus();
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape' && document.getElementById('requestSummary').classList.contains('open')) closeRequestSummary();
+});
 
 </script>
 </body>
